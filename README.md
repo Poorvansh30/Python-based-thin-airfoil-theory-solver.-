@@ -18,7 +18,7 @@ Thin Airfoil Theory lets you approximate an airfoil's aerodynamic behavior direc
 5. Use the Biot–Savart law to compute the **induced velocity field** around the airfoil and visualize it as a streamline/contour plot.
 6. Cross-validate bound circulation two ways: by integrating γ(θ) directly, and via a **velocity line integral** around a rectangular control volume.
 
-Results for the NACA 6412 airfoil are validated against ANSYS CFD data from Assignment 1.
+Results for the NACA 6412 airfoil are validated against ANSYS CFD data.
 
 ---
 
@@ -126,11 +126,3 @@ Three exploratory custom camber functions were analyzed alongside the NACA 6412 
 
 ---
 
-## Acknowledgements
-
-Developed as part of AE 244 (Aerospace Vehicle Design), IIT Bombay. Team contribution details and acknowledgements are documented in the accompanying assignment report.
-
-## References
-
-- Anderson, J.D., *Fundamentals of Aerodynamics* — Thin Airfoil Theory
-- Assignment 1 CFD (ANSYS) results, used for validation
