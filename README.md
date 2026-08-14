@@ -2,7 +2,6 @@
 
 A modular Python tool that implements classical **Thin Airfoil Theory** to analyze NACA and custom-designed airfoils — computing camber geometry, Fourier coefficients, lift/moment coefficients, circulation distribution, and the induced velocity field — without requiring a full CFD setup.
 
-Built for **AE 244: Assignment 2** (IIT Bombay), as a faster analytical companion to the CFD (ANSYS) analysis done in Assignment 1.
 
 > **Author:** Poorvansh Jain (24B0061), B.Tech Aerospace Engineering, IIT Bombay
 
