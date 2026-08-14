@@ -1,0 +1,490 @@
+Thin Airfoil Theory Analysis Tool
+
+A Python-based low-fidelity airfoil analysis tool using Thin Airfoil Theory for rapid preliminary evaluation of lift, pitching moment, circulation, and velocity fields before higher-fidelity CFD analysis.
+
+The project was developed as part of AE 244: Assignment 2 at IIT Bombay. The objective was to develop a computational tool for rapid analytical analysis of airfoil geometries and compare its predictions with previously obtained ANSYS CFD results.
+
+Overview
+
+Computational Fluid Dynamics (CFD) provides detailed information about flow around an airfoil, but repeated CFD analyses require geometry generation, domain setup, meshing, and solver computation.
+
+This project implements a lightweight analytical alternative based on Thin Airfoil Theory. The airfoil is represented through its camber line, and a Fourier-series representation is used to calculate the aerodynamic characteristics.
+
+The tool was used to:
+
+Analyse a NACA 6412 camber line
+
+Calculate and plot the camber-line slope
+
+Calculate Fourier coefficients
+
+Calculate lift coefficient $C_l$ as a function of angle of attack
+
+Calculate pitching-moment coefficient $C_m$
+
+Compare analytical predictions with previous ANSYS CFD results
+
+Calculate and visualise circulation distribution
+
+Calculate bound circulation using numerical methods
+
+Generate velocity-field and streamline plots using the Biot-Savart formulation
+
+Analyse three custom-defined camber-line profiles
+
+The implementation is intended as a low-fidelity preliminary analysis tool, rather than a replacement for viscous CFD.
+
+Theoretical Model
+
+The implementation uses the standard Thin Airfoil Theory transformation
+
+$$
+x = \frac{1}{2}(1-\cos\theta)
+$$
+
+to represent the camber line using the angular coordinate $\theta$.
+
+For a camber-line slope $dz/dx$, the Fourier coefficients are calculated numerically using the trapezoidal rule.
+
+The first coefficient is calculated as
+
+$$
+A_0 =
+\alpha -
+\frac{1}{\pi}
+\int_0^\pi
+\frac{dz}{dx},d\theta
+$$
+
+while the higher-order coefficients are calculated using
+
+$$
+A_n =
+\frac{2}{\pi}
+\int_0^\pi
+\frac{dz}{dx}\cos(n\theta),d\theta.
+$$
+
+The lift coefficient is then calculated from
+
+$$
+C_l = \pi(2A_0 + A_1)
+$$
+
+and the pitching-moment coefficient about the leading edge is calculated as
+
+$$
+C_m =
+-\frac{\pi}{2}
+\left(
+A_0+A_1-\frac{A_2}{2}
+\right).
+$$
+
+The circulation distribution is represented using a truncated Fourier series and is used to construct a discretised vortex sheet along the camber line.
+
+The induced velocity field is subsequently calculated using the Biot-Savart law.
+
+Airfoil Models
+
+NACA 6412
+
+The NACA 6412 airfoil is represented through its camber line.
+
+Since the implementation uses Thin Airfoil Theory, the thickness distribution is not directly considered. Therefore, only the first four digits of the NACA designation determine the camber-line geometry.
+
+For NACA 6412:
+
+Maximum camber = 6% of chord
+
+Location of maximum camber = 40% of chord
+
+Chord is normalised to $c=1$
+
+The camber line is generated using the standard piecewise NACA camber-line equations.
+
+Custom Camber Lines
+
+Three additional camber-line profiles were defined as mathematical functions of normalised chord:
+
+CUSTOM_1 = lambda x: 0.08*x*(1-x**2)
+CUSTOM_2 = lambda x: 0.06*np.sin(np.pi*x)
+CUSTOM_3 = lambda x: 0.05*np.log(x*(1-x) + 1)
+
+These profiles were used to investigate how changes in camber-line geometry affect the predicted aerodynamic characteristics.
+
+The custom profiles were exploratory profiles and were not intended as optimised airfoil designs.
+
+Computational Workflow
+
+User-defined parameters
+        │
+        ▼
+Camber-line generation
+        │
+        ▼
+Camber-line slope
+        │
+        ▼
+Fourier coefficient calculation
+        │
+        ├──────────────► Cl(α)
+        │
+        └──────────────► Cm(α)
+        │
+        ▼
+Circulation distribution
+        │
+        ├──────────────► Bound circulation
+        │
+        └──────────────► Biot-Savart velocity field
+        │
+        ▼
+Velocity contours and streamlines
+
+Code Structure
+
+.
+├── main.py
+├── user_inputs.py
+├── camber_line_plot.py
+├── function_slope.py
+├── fourier_coefficients.py
+├── circuilation_distribution.py
+├── velocity.py
+└── velocity_line_integral.py
+
+main.py
+
+Main execution script that integrates the different modules and runs the complete analysis.
+
+user_inputs.py
+
+Contains the user-defined parameters for the analysis, including airfoil geometry and flight conditions.
+
+camber_line_plot.py
+
+Generates the NACA and custom camber lines and produces the corresponding plots.
+
+function_slope.py
+
+Calculates the camber-line slope required by the Thin Airfoil Theory formulation.
+
+fourier_coefficients.py
+
+Calculates the Fourier coefficients and uses them to obtain $C_l$ and $C_m$.
+
+circuilation_distribution.py
+
+Calculates and plots the circulation distribution along the camber line using the Fourier-series representation.
+
+velocity.py
+
+Calculates the velocity field generated by the discretised vortex sheet using the Biot-Savart formulation and generates velocity contours and streamlines.
+
+velocity_line_integral.py
+
+Calculates the circulation around a closed contour using the velocity field.
+
+Numerical Setup
+
+The default implementation uses:
+
+1000 discretisation points
+
+Trapezoidal numerical integration
+
+15 Fourier terms for the circulation distribution
+
+An $80 \times 60$ grid for velocity-field visualisation
+
+A $4c \times 3c$ computational domain
+
+Biot-Savart-based induced velocity calculation
+
+The circulation distribution has a leading-edge singular behaviour in the idealised Thin Airfoil Theory formulation. The numerical implementation therefore avoids evaluating the velocity field exactly at the leading-edge singularity.
+
+Results
+
+Lift and Moment Characteristics
+
+For the NACA 6412 camber line, the implementation produces the variation of:
+
+$$
+C_l \quad \text{vs.} \quad \alpha
+$$
+
+and
+
+$$
+C_m \quad \text{vs.} \quad \alpha.
+$$
+
+The $C_l-\alpha$ relationship follows the approximately linear behaviour predicted by Thin Airfoil Theory.
+
+The analytical results were compared with previously obtained ANSYS CFD results. The two approaches showed closer agreement at lower angles of attack, while larger differences appeared at higher angles of attack.
+
+This difference is expected because the present implementation neglects viscous effects and flow separation, whereas the CFD analysis captures substantially more of the flow physics.
+
+Circulation
+
+The project calculates bound circulation using two approaches:
+
+Integration of the calculated circulation distribution
+
+Line integration of the velocity field around a closed contour
+
+At the design condition of approximately
+
+$$
+\alpha = 3^\circ
+$$
+
+the two approaches produced:
+
+Method
+
+Bound Circulation
+
+Integration of circulation distribution
+
+8.275
+
+Velocity line integral
+
+8.304
+
+The close agreement between the two approaches provides a numerical sanity check for the circulation calculation.
+
+Velocity Field
+
+The velocity field is calculated by discretising the circulation distribution into vortex elements and applying the Biot-Savart law.
+
+The implementation generates:
+
+Velocity magnitude contours
+
+Streamlines
+
+Camber-line geometry
+
+The velocity-field plots demonstrate the induced velocity associated with the vortex sheet around the cambered airfoil.
+
+Because the model is inviscid and represents the airfoil through a camber-line vortex sheet, it does not reproduce viscous boundary layers, flow separation, or a realistic viscous wake.
+
+Custom Airfoil Analysis
+
+The same Thin Airfoil Theory framework was applied to three custom camber-line profiles.
+
+The resulting $C_l-\alpha$ curves demonstrate the expected approximately common lift-curve slope while exhibiting different lift offsets due to the different camber-line geometries.
+
+The custom profiles also produce different pitching-moment characteristics.
+
+The comparison showed that the custom profiles generally produced lower lift coefficients than the NACA 6412 reference profile over the analysed range.
+
+The profiles were intended primarily to investigate the influence of camber-line geometry rather than to serve as practical optimised airfoils.
+
+Comparison with CFD
+
+The main advantage of the present implementation is computational simplicity and speed.
+
+However, the analytical model makes several simplifying assumptions that limit its applicability.
+
+Inviscid flow
+
+Viscous effects are neglected. Consequently, the model does not capture:
+
+Boundary-layer development
+
+Skin-friction drag
+
+Flow separation
+
+Stall
+
+Thin-airfoil approximation
+
+The physical airfoil is reduced to its camber line. The finite thickness of the actual NACA 6412 profile is therefore not represented.
+
+Small-angle assumptions
+
+The analytical formulation is based on assumptions that become less representative as the angle of attack increases.
+
+No direct drag prediction
+
+The present implementation does not provide a viscous drag model. Therefore, it cannot by itself provide a complete drag polar or determine aircraft propulsion requirements.
+
+Higher-fidelity CFD
+
+CFD is therefore more appropriate once airfoil configurations have been shortlisted and detailed aerodynamic behaviour is required.
+
+The analytical tool is best viewed as a rapid preliminary analysis method, rather than a substitute for CFD.
+
+What the Project Demonstrates
+
+The project involved implementation of the underlying aerodynamic formulation rather than simply using an existing airfoil-analysis package.
+
+Key components include:
+
+Thin Airfoil Theory implementation
+
+NACA camber-line generation
+
+Numerical differentiation
+
+Numerical integration using the trapezoidal rule
+
+Fourier-series coefficient calculation
+
+Lift and pitching-moment prediction
+
+Circulation-distribution calculation
+
+Discretised vortex-sheet modelling
+
+Biot-Savart velocity calculation
+
+Velocity-field visualisation
+
+Bound-circulation calculation
+
+Comparison against CFD results
+
+Parametric analysis of custom camber-line geometries
+
+Modular Python implementation
+
+Limitations
+
+The following limitations should be considered when interpreting the results:
+
+The airfoil is represented through its camber line rather than its complete geometry.
+
+Viscous effects are neglected.
+
+Boundary-layer behaviour is not modelled.
+
+Flow separation and stall are not predicted.
+
+Drag is not directly calculated.
+
+The circulation distribution is represented using a finite number of Fourier terms.
+
+Numerical discretisation introduces approximation error.
+
+The velocity field is based on a discretised vortex-sheet representation.
+
+The tool is intended for preliminary aerodynamic analysis rather than final airfoil selection or aircraft performance prediction.
+
+Running the Code
+
+Requirements
+
+Python 3.x
+
+The project uses:
+
+numpy
+matplotlib
+
+Install the dependencies with:
+
+pip install numpy matplotlib
+
+Execution
+
+Clone the repository:
+
+git clone <repository-url>
+
+Enter the project directory:
+
+cd thin-airfoil-theory-solver
+
+Run the main program:
+
+python main.py
+
+The main user-configurable parameters are contained in:
+
+user_inputs.py
+
+These can be modified to analyse different airfoil geometries and flight conditions.
+
+Output
+
+Running the program generates plots for:
+
+NACA camber line
+
+Camber-line slope
+
+Fourier coefficients
+
+$C_l$ vs. angle of attack
+
+$C_m$ vs. angle of attack
+
+Circulation distribution
+
+Velocity field around the NACA profile
+
+$C_l$ comparison for the custom profiles
+
+$C_m$ comparison for the custom profiles
+
+Velocity fields around the custom profiles
+
+The program also calculates the bound circulation using the implemented numerical methods.
+
+Individual Contribution
+
+I developed the Python implementation for the project, including the computational modules used throughout the analysis.
+
+My work included:
+
+NACA and custom camber-line generation
+
+Numerical calculation of the camber-line slope
+
+Fourier-coefficient calculation
+
+Calculation of lift coefficient $C_l$
+
+Calculation of pitching-moment coefficient $C_m$
+
+Circulation-distribution implementation
+
+Bound-circulation calculation
+
+Biot-Savart-based velocity-field calculation
+
+Velocity-field and streamline visualisation
+
+Integration of the individual modules into the main analysis workflow
+
+Debugging and numerical sanity checks
+
+The code was structured into separate modules so that the individual functions could be reused for different airfoil geometries and flight conditions.
+
+The project was completed as a team assignment, with discussions and cross-checking of results among team members.
+
+Team
+
+Poorvansh Jain — Python implementation and integration of the aerodynamic analysis modules
+
+Heet Patel — Contributions to camber-line and slope functions
+
+Priyamwada — Contributions to circulation distribution and velocity-field implementation
+
+References
+
+AE 244 course material, Lectures 8 and 9: Vortex and Inviscid Airfoil Modelling
+
+The theoretical formulation follows the Thin Airfoil Theory and vortex-sheet modelling covered in the course material.
+
+Academic Context
+
+This project was completed as AE 244: Assignment 2 at IIT Bombay.
+
+The assignment involved developing a modular Thin Airfoil Theory program, analysing a NACA airfoil, comparing the analytical results with previous CFD results, calculating circulation, visualising the velocity field, and analysing custom camber-line profiles.
